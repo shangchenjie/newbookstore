@@ -104,7 +104,7 @@ public:
     void ISBNinitialise();
     void ISBNflush();
     void importBook( int quantity, double Totalcost);
-    void SellBook(const string& ISBN, int quantity, double price);
+    void SellBook(const string& ISBN, int quantity);
     Book FindBookByExactKeywords(const std::string& keywords);
     void show(const std::string& field,const std::string& value);
     void showall();
