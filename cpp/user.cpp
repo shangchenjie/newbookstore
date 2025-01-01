@@ -5,7 +5,7 @@
 #include <cstring> // 包含 strcmp 和 strlen
 
 extern diaryManager diaryMgr;
-User* userbloc=new User[128];
+User userbloc[128];
 accountHeadNode userlink[100001];
 extern void add_account(User);
 extern BookManager bookMgr;
