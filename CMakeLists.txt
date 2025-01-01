@@ -1,20 +1,11 @@
-cmake_minimum_required(VERSION 3.0)
-
+cmake_minimum_required(VERSION 3.28)
+set(CMAKE_CXX_STANDARD 20)
 project(code)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-include_directories(src)
-
-add_executable(bookstore
-        cpp/book.cpp
-        cpp/diary.cpp
-        cpp/finance.cpp
+add_executable(code
         cpp/main.cpp
-        cpp/token.cpp
-        cpp/user.cpp
 )
+
 target_include_directories(
         code
         PUBLIC
