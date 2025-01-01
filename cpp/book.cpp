@@ -1,7 +1,7 @@
 #include "book.h"
 #include "finance.h"
-#include "src/diary.h"
-#include "src/user.h"
+#include "../src/diary.h"
+#include "../src/user.h"
 
 
 Book* ISBNbloc=new Book[128];
