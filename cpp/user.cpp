@@ -4,9 +4,9 @@
 #include <string>
 
 extern diaryManager diaryMgr;
-User userbloc[accountblock_size];
+User userbloc[300];
 
-accountHeadNode userlink[100001];
+accountHeadNode userlink[1000001];
 extern void add_account(User);
 extern BookManager bookMgr;
 accountNodeHead::accountNodeHead(const std::string& file_name) {
