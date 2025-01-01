@@ -34,6 +34,7 @@ struct accountHeadNode {
 struct data {
     string userID;
     string ISBN;
+    int privilege;
 };
 
 const int accountsizeofP = sizeof(User);
@@ -99,22 +100,24 @@ public:
         accountinitialise();
     }
     ~UserManager();
-    void deleteaccountNode(int index, const User& user);
+    void deleteaccountNode(int index, const char* userID);
     void addaccountNode(int index, const User& user);
     void add_account(const User& user);
     void delete_account(const char* userID);
-    void suWithPassword(const char* userID,const char*password);
-    void suWithoutPassword(const char* userID);
+    void suWithPassword(const User& user,const char*password);
+    void suWithoutPassword(const User& user);
     void logout();
     User getcheck(const char* userID) ;
     bool check_privilege(const std::string& operation);
-    void modifypassword(const User& old_account, const User& new_account);
+    void modifypassword(const char* userID , const char* newPassword);
+    void modifypasswordwithcurrent(const char*userID,const char* currentPassword,const char*newPassword);
     void selectbook(const std::string& ISBN);
     void changebook(Book& book);
     void accountinitialise();
     void flush();
     string getLastLogbook() const;
     User getLastLoguser() ;
+    int getLastLogprivilege()const ;
     void ModifyLastBookInLogbook(const Book& newBookData);
 };
 
