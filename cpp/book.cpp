@@ -4,8 +4,8 @@
 #include "../src/user.h"
 
 
-Book* ISBNbloc=new Book[128];
-ISBNHeadNode ISBNlink[100001];
+Book* ISBNbloc=new Book[300];
+ISBNHeadNode ISBNlink[1000001];
 extern UserManager userMgr;
 
 ISBNNodeHead::ISBNNodeHead(const string& file_name) {
