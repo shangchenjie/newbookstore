@@ -15,3 +15,9 @@ add_executable(bookstore
         cpp/token.cpp
         cpp/user.cpp
 )
+target_include_directories(
+        code
+        PUBLIC
+        src/
+        cpp/
+)
