@@ -6,7 +6,7 @@
 #include <fstream>
 
 struct diarymessage {
-    char adminID[20];
+    char adminID[31];
     char action[100];
 };
 
