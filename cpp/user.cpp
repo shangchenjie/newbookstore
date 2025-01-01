@@ -105,7 +105,6 @@ void accountNodeBody::writeaccountNode(int index) {
     file.write(reinterpret_cast<char*>(userbloc), userlink[index].size * accountsizeofP);
 }
 
-// UserManager 类的实现
 UserManager::~UserManager() {
     flush();
 }
@@ -545,7 +544,7 @@ void UserManager::ModifyLastBookInLogbook(const Book& newBookData) {
     Book findbook = bookMgr.FindByISBN(findISBN);
     Book book = bookMgr.FindByISBN(lastISBN);
     if (book.ISBN[0] == '\0'||findbook.ISBN[0]!='\0') {
-        std::cerr << "Invalid\n";
+        std::cout << "Invalid\n";
         return;
     }
     if (newBookData.ISBN[0] != '\0'&&compareISBN(newBookData.ISBN,book.ISBN)!=0) {
