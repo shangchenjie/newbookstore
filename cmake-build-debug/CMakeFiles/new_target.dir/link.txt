@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -rdynamic "CMakeFiles/new_target.dir/bookstore-/diary.cpp.o" "CMakeFiles/new_target.dir/bookstore-/user.cpp.o" "CMakeFiles/new_target.dir/bookstore-/main.cpp.o" "CMakeFiles/new_target.dir/bookstore-/book.cpp.o" "CMakeFiles/new_target.dir/bookstore-/finance.cpp.o" "CMakeFiles/new_target.dir/bookstore-/token.cpp.o" -o new_target 

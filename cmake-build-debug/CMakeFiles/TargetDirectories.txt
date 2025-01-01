@@ -1,0 +1,3 @@
+/mnt/c/down/bookstore/cmake-build-debug/CMakeFiles/new_target.dir
+/mnt/c/down/bookstore/cmake-build-debug/CMakeFiles/edit_cache.dir
+/mnt/c/down/bookstore/cmake-build-debug/CMakeFiles/rebuild_cache.dir
