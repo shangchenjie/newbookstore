@@ -54,7 +54,8 @@ void FinanceManager::printTransactions(int count) const {
         return;
     }
     if (count > priceChanges.size()) {
-        count=-1;
+        std::cout<<"Invalid\n";
+        return;
 
     }
     double income = 0.00;
