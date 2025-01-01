@@ -436,7 +436,7 @@ int main() {
     while (true) {
         //std::cout << "Enter command: ";
         std::getline(std::cin, input);
-        if (input == "quit" || input == "exit") {
+        if (input==""||input == "quit" || input == "exit") {
             break;
         } else {
             processCommand(input);
