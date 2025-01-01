@@ -9,7 +9,6 @@ User userbloc[128];
 accountHeadNode userlink[100001];
 extern void add_account(User);
 extern BookManager bookMgr;
-// accountNodeHead 类的实现
 accountNodeHead::accountNodeHead(const std::string& file_name) {
     this->file_name = file_name;
     file.open(file_name, std::ios::in | std::ios::out | std::ios::binary);
@@ -538,7 +537,7 @@ User UserManager::getLastLoguser() {
 }
 void UserManager::ModifyLastBookInLogbook(const Book& newBookData) {
     if (log_.empty()) {
-        std::cerr << "Invalid\n";
+        std::cout << "Invalid\n";
         return;
     }
     string lastISBN = log_.back().ISBN;
