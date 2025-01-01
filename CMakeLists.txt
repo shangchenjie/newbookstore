@@ -16,7 +16,7 @@ add_executable(bookstore
         cpp/user.cpp
 )
 target_include_directories(
-        code
+        bookstore
         PUBLIC
         src/
         cpp/
