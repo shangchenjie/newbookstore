@@ -410,14 +410,13 @@ void BookManager::importBook(int quantity, double Totalcost) {
     }
 }
 
-void BookManager::SellBook(const string& ISBN, int quantity, double price) {
-    Book book=FindByISBN(ISBN);
-    if ( quantity > 0 && price > 0&&book.ISBN[0]!='\0') {
-        strcpy(book.ISBN, ISBN.c_str());
+void BookManager::SellBook(const string& ISBN, int quantity) {
+    if ( quantity > 0 &&ISBN[0]!='\0') {
+        Book book;
         int p = ISBNHead.getHead();
         while (p != -1) {
             ISBNBody.ISBNvisitNode(ISBNlink[p].id);
-            if (ISBNlink[p].size > 0 && compareISBN(ISBNbloc[0].ISBN ,book.ISBN)<=0 && compareISBN(ISBNbloc[ISBNlink[p].size - 1].ISBN , book.ISBN)>=0) {
+            if (ISBNlink[p].size > 0 && compareISBN(ISBNbloc[0].ISBN ,ISBN.c_str())<=0 && compareISBN(ISBNbloc[ISBNlink[p].size - 1].ISBN , ISBN.c_str())>=0) {
                 for (int i = 0; i < ISBNlink[p].size; ++i) {
                     if (strcmp(ISBNbloc[i].ISBN, ISBN.c_str()) == 0) {
                         if(ISBNbloc[i].stock<quantity) {
@@ -426,7 +425,7 @@ void BookManager::SellBook(const string& ISBN, int quantity, double price) {
                         }
                         ISBNbloc[i].stock-= quantity;
                         ISBNBody.ISBNwriteNode(ISBNlink[p].id);
-                        double totalprice = quantity * price;
+                        double totalprice = quantity *ISBNbloc[i].price;
                         std::cout << std::fixed << std::setprecision(2) << totalprice << std::endl;
                         financeMgr.recordPriceChange(totalprice);
                         diaryMgr.adddiary(userMgr.getLastLoguser().userID, "buy book: " + std::string(book.title) + " " + std::to_string(quantity) + "0 at");
@@ -434,12 +433,13 @@ void BookManager::SellBook(const string& ISBN, int quantity, double price) {
                     }
                 }
             }
-            if (compareISBN(ISBNbloc[0].ISBN ,book.ISBN)>0) {
+            if (compareISBN(ISBNbloc[0].ISBN ,ISBN.c_str())>0) {
                 std::cout<<"Invalid\n";
                 return;
             }
             p = ISBNlink[p].nex_head;
         }
+        std::cout<<"Invalid\n";
     }else {
         std::cout<<"Invalid\n";
     }
@@ -469,8 +469,12 @@ void BookManager::show(const std::string& field, const std::string& value) {
                 std::string keywordsStr(book.keywords);
                 std::stringstream ss(keywordsStr);
                 std::string keyword;
-                while (std::getline(ss, keyword, '|')) {
-                    keywordsList.push_back(keyword);
+                if (keywordsStr.find('|') != std::string::npos) {
+                    while (std::getline(ss, keyword, '|')) {
+                        keywordsList.push_back(keyword);
+                    }
+                } else {
+                    keywordsList.push_back(keywordsStr);
                 }
 
 
@@ -485,8 +489,7 @@ void BookManager::show(const std::string& field, const std::string& value) {
                 continue;
             }
 
-            // 输出符合条件的书籍
-            if (book.title[0] != '\0') {
+            if (book.ISBN[0] != '\0') {
                 std::cout << book.ISBN << "\t"
                           << book.title << "\t"
                           << book.author << "\t"
@@ -504,6 +507,10 @@ void BookManager::show(const std::string& field, const std::string& value) {
 }
 void BookManager::showall() {
     int p = ISBNHead.getHead();
+    if(p==-1) {
+        std::cout << "\n";
+        return;
+    }
     while (p != -1) {
         ISBNBody.ISBNvisitNode(ISBNlink[p].id);
         for (int i = 0; i < ISBNlink[p].size; ++i) {
@@ -517,5 +524,4 @@ void BookManager::showall() {
         }
         p = ISBNlink[p].nex_head;
     }
-    std::cout << "\n";
 }
