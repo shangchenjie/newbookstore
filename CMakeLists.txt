@@ -4,6 +4,11 @@ project(code)
 
 add_executable(code
         cpp/main.cpp
+        cpp/user.cpp
+        cpp/book.cpp
+        cpp/diary.cpp
+        cpp/token.cpp
+        cpp/finance.cpp
 )
 
 target_include_directories(
