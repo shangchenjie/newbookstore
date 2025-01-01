@@ -5,8 +5,8 @@
 #include <iostream>
 #include <string>
 #include "../src/token.h"
+#include "set"
 
-// 全局变量
 BookManager bookMgr;
 UserManager userMgr;
 
@@ -54,16 +54,15 @@ void processCommand(const std::string &input) {
             return;
         }
         if (userMgr.check_privilege("su")) {
-            User currentUser = userMgr.getLastLoguser();
             User targetUser = userMgr.getcheck(userID.c_str());
-            if (currentUser.privilege >= targetUser.privilege&&currentUser.userID[0]!='\0') {
-                userMgr.suWithoutPassword(userID.c_str());
+            if (userMgr.getLastLogprivilege() >= targetUser.privilege) {
+                userMgr.suWithoutPassword(targetUser);
             } else {
                 if (!password.empty() && !Token::isValidPassword(password)) {
                     std::cout << "Invalid\n";
                     return;
                 }
-                userMgr.suWithPassword(userID.c_str(), password.c_str());
+                userMgr.suWithPassword(targetUser, password.c_str());
             }
         }
     } else if (command == "useradd") {
@@ -92,14 +91,13 @@ void processCommand(const std::string &input) {
             std::cout << "Invalid\n";
             return;
         }
-        User currentUser = userMgr.getcheck(userMgr.getLastLoguser().userID);
         User user;
         strcpy(user.userID, userID.c_str());
         strcpy(user.password, password.c_str());
         user.privilege = std::stoi(privilege);
         strcpy(user.username, username.c_str());
 
-        if (userMgr.check_privilege("add_account")&&currentUser.privilege>user.privilege) {
+        if (userMgr.check_privilege("add_account")&&userMgr.getLastLogprivilege()>user.privilege) {
             userMgr.add_account(user);
         } else {
             std::cout << "Invalid\n";
@@ -147,11 +145,11 @@ void processCommand(const std::string &input) {
             return;
         }
 
-        User currentUser = userMgr.getcheck(userMgr.getLastLoguser().userID);
-        User targetUser = userMgr.getcheck(userID.c_str());
+        //User currentUser = userMgr.getcheck(userMgr.getLastLoguser().userID);
+        //User targetUser = userMgr.getcheck(userID.c_str());
 
         if (userMgr.check_privilege("modifypassword")) {
-            if (currentUser.privilege >= 7) {
+            if (userMgr.getLastLogprivilege() >= 7) {
                 if (tokens.size() < 3) {
                     std::cout << "Invalid\n";
                     return;
@@ -161,9 +159,7 @@ void processCommand(const std::string &input) {
                     std::cout << "Invalid\n";
                     return;
                 }
-                User newUser = targetUser;
-                strcpy(newUser.password, newPassword.c_str());
-                userMgr.modifypassword(targetUser, newUser);
+                userMgr.modifypassword(userID.c_str(), newPassword.c_str());
             } else {
                 if (tokens.size() < 4) {
                     std::cout << "Invalid\n";
@@ -175,12 +171,8 @@ void processCommand(const std::string &input) {
                     std::cout << "Invalid\n";
                     return;
                 }
-                if (strcmp(targetUser.password, currentPassword.c_str()) == 0) {
-                    User newUser = targetUser;
-                    strcpy(newUser.password, newPassword.c_str());
-                    userMgr.modifypassword(targetUser, newUser);
-                } else {
-                    std::cout << "Invalid\n";
+                else {
+                    userMgr.modifypasswordwithcurrent(userID.c_str(), currentPassword.c_str(),newPassword.c_str());
                 }
             }
         } else {
@@ -197,14 +189,8 @@ void processCommand(const std::string &input) {
             std::cout << "Invalid\n";
             return;
         }
-
         if (userMgr.check_privilege("delete_account")) {
-            User user = userMgr.getcheck(userID.c_str());
-            if (user.userID[0] != '\0') {
-                userMgr.delete_account(userID.c_str());
-            } else {
-                std::cout << "Invalid\n";
-            }
+            userMgr.delete_account(userID.c_str());
         } else {
             std::cout << "Invalid\n";
         }
@@ -226,10 +212,9 @@ void processCommand(const std::string &input) {
         }
 
         int quantity = std::stoi(quantityStr);
-        Book book = bookMgr.FindByISBN(ISBN);
-        if (userMgr.check_privilege("sell_book") && book.ISBN[0] != '\0') {
-            bookMgr.SellBook(ISBN, quantity, book.price);
-        } else {
+        if (userMgr.check_privilege("sell_book") && ISBN[0] != '\0') {
+            bookMgr.SellBook(ISBN, quantity);
+        }else {
             std::cout << "Invalid\n";
         }
     } else if (command == "select") {
@@ -386,17 +371,25 @@ void processCommand(const std::string &input) {
                 }
             } else if (token.find("-keyword=") == 0) {
                 std::string keyword = token.substr(9);
-                if (keyword.empty() ) {
+                if (keyword.empty()) {
                     isValid = false;
                 } else {
-                    keyword = keyword.substr(0, keyword.size() );
-                    if (keyword.empty()) {
+                    std::vector<std::string> keywordsList;
+                    std::stringstream ss(keyword);
+                    std::string singleKeyword;
+                    while (std::getline(ss, singleKeyword, '|')) {
+                        keywordsList.push_back(singleKeyword);
+                    }
+
+                    std::set<std::string> uniqueKeywords(keywordsList.begin(), keywordsList.end());
+                    if (uniqueKeywords.size() != keywordsList.size()) {
                         isValid = false;
                     } else {
                         strncpy(newBookData.keywords, keyword.c_str(), sizeof(newBookData.keywords) - 1);
+                        newBookData.keywords[sizeof(newBookData.keywords) - 1] = '\0';
                     }
                 }
-            } else if (token.find("-price=") == 0) {
+            }else if (token.find("-price=") == 0) {
                 std::string priceStr = token.substr(7);
                 try {
                     newBookData.price = std::stod(priceStr);
@@ -429,22 +422,19 @@ void processCommand(const std::string &input) {
 }
 
 int main() {
-    //userMgr.accountinitialise();
-    //bookMgr.ISBNinitialise();
 
+    //freopen("testcase4.in", "r", stdin);
+    //freopen("output.txt", "w", stdout);
     std::string input;
     while (true) {
-        //std::cout << "Enter command: ";
         std::getline(std::cin, input);
-        if (input==""||input == "quit" || input == "exit") {
+        if (input.empty()||input == "quit" || input == "exit") {
             break;
         } else {
             processCommand(input);
         }
     }
-    //userMgr.flush();
-    //bookMgr.ISBNflush();
-    //diaryMgr.savediarysToFile();
+
 
     return 0;
 }
