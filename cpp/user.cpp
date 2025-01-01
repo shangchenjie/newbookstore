@@ -493,7 +493,6 @@ void UserManager::flush() {
         accountHead.writeaccountHead(p, userlink[p]);
         p = userlink[p].nex_head;
     }
-    delete[] userbloc;
 }
 
 std::string UserManager::getLastLogbook() const {
