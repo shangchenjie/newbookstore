@@ -156,6 +156,8 @@ void UserManager::deleteaccountNode(int index, const char* userID) {
         userlink[index].size--;
 
         accountBody.writeaccountNode(userlink[index].id);
+    }else{
+        std::cout<<"Invalid\n";
     }
 }
 
