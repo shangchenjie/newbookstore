@@ -1,11 +1,11 @@
-add_executable(new_target bookstore-/diary.cpp
-        bookstore-/user.cpp
-        bookstore-/main.cpp
-        bookstore-/book.cpp
-        bookstore-/user.h
-        bookstore-/diary.h
-        bookstore-/book.h
-        bookstore-/finance.cpp
-        bookstore-/token.h
-        bookstore-/token.cpp
+add_executable(new_target bookstore-/cpp/diary.cpp
+        bookstore-/cpp/user.cpp
+        bookstore-/cpp/main.cpp
+        bookstore-/cpp/book.cpp
+        bookstore-/src/user.h
+        bookstore-/src/diary.h
+        bookstore-/src/book.h
+        bookstore-/cpp/finance.cpp
+        bookstore-/src/token.h
+        bookstore-/cpp/token.cpp
 )
