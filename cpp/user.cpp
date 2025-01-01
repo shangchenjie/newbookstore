@@ -2,10 +2,10 @@
 #include "../src/diary.h"
 #include <cassert>
 #include <string>
-#include <cstring> // 包含 strcmp 和 strlen
 
 extern diaryManager diaryMgr;
-User userbloc[128];
+User userbloc[accountblock_size];
+
 accountHeadNode userlink[100001];
 extern void add_account(User);
 extern BookManager bookMgr;
@@ -78,7 +78,6 @@ void accountNodeHead::deleteaccountHead(int index) {
     cur_size--;
 }
 
-// accountNodeBody 类的实现
 accountNodeBody::accountNodeBody(const std::string& file_name) {
     this->file_name = file_name;
     file.open(file_name, std::ios::in | std::ios::out | std::ios::binary);
@@ -133,17 +132,17 @@ void UserManager::addaccountNode(int index, const User& user) {
     accountBody.writeaccountNode(userlink[index].id);
 }
 
-void UserManager::deleteaccountNode(int index, const User& user) {
+void UserManager::deleteaccountNode(int index, const char* userID) {
     accountBody.visitaccountNode(userlink[index].id);
 
     int left = 0, right = userlink[index].size - 1;
     int deletePos = -1;
     while (left <= right) {
         int mid = (left + right) / 2;
-        if (strcmp(userbloc[mid].userID, user.userID) == 0) {
+        if (strcmp(userbloc[mid].userID, userID) == 0) {
             deletePos = mid;
             break;
-        } else if (strcmp(userbloc[mid].userID, user.userID) < 0) {
+        } else if (strcmp(userbloc[mid].userID, userID) < 0) {
             left = mid + 1;
         } else {
             right = mid - 1;
@@ -237,10 +236,9 @@ void UserManager::add_account(const User& user) {
 }
 
 void UserManager::delete_account(const char* userID) {
-    User user = getcheck(userID);
-    if (user.userID[0] == '\0') {
+    if (userID[0] == '\0') {
         std::cout<<"Invalid\n";
-        diaryMgr.adddiary(log_.back().userID, "Deleted user: " + std::string(user.userID) + "failed");
+        diaryMgr.adddiary(log_.back().userID, "Deleted user: " + std::string(userID) + "failed");
         return;
     }
     if(!log_.empty()) {
@@ -254,21 +252,21 @@ void UserManager::delete_account(const char* userID) {
     int p = accountHead.getHead();
     while (p != -1) {
         accountBody.visitaccountNode(userlink[p].id);
-        if (userlink[p].size > 0 && strcmp(userbloc[0].userID, user.userID) <= 0 && strcmp(userbloc[userlink[p].size - 1].userID, user.userID) >= 0) {
-            deleteaccountNode(p, user);
+        if (userlink[p].size > 0 && strcmp(userbloc[0].userID, userID) <= 0 && strcmp(userbloc[userlink[p].size - 1].userID, userID) >= 0) {
+            deleteaccountNode(p, userID);
             if (userlink[p].size == 0) {
                 accountHead.deleteaccountHead(p);
+                diaryMgr.adddiary(log_.back().userID, "Deleted user: " + std::string(userID));
             }
             return;
         }
-        if (strcmp(userbloc[0].userID, user.userID) > 0) {
+        if (strcmp(userbloc[0].userID, userID) > 0) {
+            std::cout<<"Invalid\n";
             return;
         }
         p = userlink[p].nex_head;
     }
-    if (!log_.empty()) {
-        diaryMgr.adddiary(log_.back().userID, "Deleted user: " + std::string(user.userID));
-    }
+    std::cout<<"Invalid\n";
 }
 
 User UserManager::getcheck(const char* userID) {
@@ -297,38 +295,36 @@ User UserManager::getcheck(const char* userID) {
                 }
             }
         }
-
         p = userlink[p].nex_head;
     }
-
     return user;
 }
 
-void UserManager::suWithPassword(const char* userID,const char*password) {
-    User user = getcheck(userID);
+void UserManager::suWithPassword(const User& user,const char*password) {
     if (strcmp(user.password, password) == 0) {
         data data1;
         data1.userID = std::string(user.userID);
         data1.ISBN = "";
+        data1.privilege =user.privilege;
         log_.push_back(data1);
-        diaryMgr.adddiary(userID, "Logged in");
+        diaryMgr.adddiary(user.userID, "Logged in");
     } else {
         std::cout<<"Invalid\n";
-        diaryMgr.adddiary(userID, "failed to Log in");
+        diaryMgr.adddiary(user.userID, "failed to Log in");
     }
 }
 
-void UserManager::suWithoutPassword(const char* userID) {
-    User user = getcheck(userID);
+void UserManager::suWithoutPassword(const User& user) {
     if (user.userID[0]!='\0') {
         data data2;
         data2.userID = std::string(user.userID);
         data2.ISBN = "";
+        data2.privilege =user.privilege;
         log_.push_back(data2);
-        diaryMgr.adddiary(userID, "Logged in");
+        diaryMgr.adddiary(user.userID, "Logged in");
     } else {
         std::cout<<"Invalid\n";
-        diaryMgr.adddiary(userID, "failed to Log in");
+        diaryMgr.adddiary(user.userID, "failed to Log in");
     }
 }
 
@@ -344,67 +340,79 @@ void UserManager::logout() {
 }
 
 bool UserManager::check_privilege(const std::string& operation) {
-    User user;
-    if (!log_.empty()) {
-        user = getcheck(log_.back().userID.c_str());
+    if (log_.empty()&&operation!="su") {
+        return false;
     }else {
-        user.privilege=0;
-    }
-    if (user.userID[0] == '\0' && operation != "su") {
-        return false;
-    }
-    if (operation == "add_account" && user.privilege >= 3) {
-        return true;
-    } else if (operation == "delete_account" && user.privilege >= 7) {
-        return true;
-    } else if (operation == "modifypassword" && user.privilege >= 1) {
-        return true;
-    } else if (operation == "select_book" && user.privilege >= 3) {
-        return true;
-    } else if (operation == "sell_book" && user.privilege >= 0) {
-        return true;
-    } else if (operation == "add_book" && user.privilege >= 3) {
-        return true;
-    } else if (operation == "import_book" && user.privilege >= 3) {
-        return true;
-    } else if (operation == "modify_book" && user.privilege >= 3) {
-        return true;
-    } else if (operation == "show_book" && user.privilege >= 1) {
-        return true;
-    } else if (operation == "show_import" && user.privilege >= 7) {
-        return true;
-    } else if (operation == "show_sell" && user.privilege >= 7) {
-        return true;
-    } else if (operation == "show_finance" && user.privilege >= 7) {
-        return true;
-    }else if (operation == "log" && user.privilege >= 7) {
-        return true;
-    }else if (operation == "su" ) {
-        return true;
-    } else {
-        return false;
+        if (operation == "add_account" && log_.back().privilege >= 3) {
+            return true;
+        } else if (operation == "delete_account" && log_.back().privilege >= 7) {
+            return true;
+        } else if (operation == "modifypassword" && log_.back().privilege >= 1) {
+            return true;
+        } else if (operation == "select_book" && log_.back().privilege >= 3) {
+            return true;
+        } else if (operation == "sell_book" && log_.back().privilege >= 0) {
+            return true;
+        } else if (operation == "add_book" && log_.back().privilege >= 3) {
+            return true;
+        } else if (operation == "import_book" && log_.back().privilege >= 3) {
+            return true;
+        } else if (operation == "modify_book" && log_.back().privilege >= 3) {
+            return true;
+        } else if (operation == "show_book" && log_.back().privilege >= 1) {
+            return true;
+        } else if (operation == "show_import" && log_.back().privilege >= 7) {
+            return true;
+        } else if (operation == "show_sell" && log_.back().privilege >= 7) {
+            return true;
+        } else if (operation == "show_finance" && log_.back().privilege >= 7) {
+            return true;
+        }else if (operation == "log" && log_.back().privilege >= 7) {
+            return true;
+        }else if (operation == "su" ) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 
-void UserManager::modifypassword(const User& old_account, const User& new_account) {
+void UserManager::modifypassword(const char* userID , const char* newPassword) {
     int p = accountHead.getHead();
     while (p != -1) {
         accountBody.visitaccountNode(userlink[p].id);
         for (int i = 0; i < userlink[p].size; ++i) {
-            if (strcmp(userbloc[i].userID, old_account.userID) == 0) {
-                userbloc[i] = new_account;
+            if (strcmp(userbloc[i].userID, userID) == 0) {
+                strcpy(userbloc[i].password, newPassword);
                 accountBody.writeaccountNode(userlink[p].id);
                 if (!log_.empty()) {
-                    diaryMgr.adddiary(log_.back().userID, "Modified account from " + std::string(old_account.userID) + " to " + std::string(new_account.userID));
+                    diaryMgr.adddiary(log_.back().userID, "Modified account to " + std::string(newPassword));
                 }
                 return;
             }
         }
         p = userlink[p].nex_head;
     }
-    diaryMgr.adddiary(log_.back().userID, "failed to Modified account from " + std::string(old_account.userID) + " to " + std::string(new_account.userID));
+    std::cout<<"Invalid\n";
 }
-
+void UserManager::modifypasswordwithcurrent(const char*userID,const char* currentPassword,const char*newPassword){
+    int p = accountHead.getHead();
+    while (p != -1) {
+        accountBody.visitaccountNode(userlink[p].id);
+        for (int i = 0; i < userlink[p].size; ++i) {
+            if (strcmp(userbloc[i].userID, userID) == 0&&strcmp(userbloc[i].password, currentPassword) == 0) {
+                strcpy(userbloc[i].password, newPassword);
+                accountBody.writeaccountNode(userlink[p].id);
+                if (!log_.empty()) {
+                    diaryMgr.adddiary(log_.back().userID, "Modified account to " + std::string(newPassword));
+                }
+                return;
+            }
+        }
+        p = userlink[p].nex_head;
+    }
+    std::cout<<"Invalid\n";
+}
 void UserManager::selectbook(const std::string& ISBN) {
     Book book = bookMgr.FindByISBN(ISBN);
 
@@ -426,13 +434,6 @@ void UserManager::selectbook(const std::string& ISBN) {
     }
 }
 
-void UserManager::changebook(Book& book) {
-    if (!log_.empty()) {
-        string ISBN=log_.back().ISBN ;
-        log_.back().ISBN = std::string(book.ISBN);
-        diaryMgr.adddiary(log_.back().userID, "changed book: " + ISBN + "to" +std::string(book.title));
-    }
-}
 
 void UserManager::accountinitialise() {
     fstream file_;
@@ -500,7 +501,13 @@ std::string UserManager::getLastLogbook() const {
         return "";
     }
 }
-
+int UserManager::getLastLogprivilege()  const {
+    if (!log_.empty()) {
+        return log_.back().privilege;
+    } else {
+        return 0;
+    }
+}
 User UserManager::getLastLoguser() {
     User user = {};
     if (!log_.empty()) {
@@ -539,19 +546,29 @@ void UserManager::ModifyLastBookInLogbook(const Book& newBookData) {
         std::cout << "Invalid\n";
         return;
     }
+
     string lastISBN = log_.back().ISBN;
     string findISBN = newBookData.ISBN;
     Book findbook = bookMgr.FindByISBN(findISBN);
     Book book = bookMgr.FindByISBN(lastISBN);
-    if (book.ISBN[0] == '\0'||findbook.ISBN[0]!='\0') {
+
+    if (book.ISBN[0] == '\0' || findbook.ISBN[0] != '\0') {
         std::cout << "Invalid\n";
         return;
     }
-    if (newBookData.ISBN[0] != '\0'&&compareISBN(newBookData.ISBN,book.ISBN)!=0) {
-        strncpy(book.ISBN, newBookData.ISBN, sizeof(book.ISBN) - 1);
+
+    if (newBookData.ISBN[0] != '\0' && compareISBN(newBookData.ISBN, book.ISBN) != 0) {
+        string newISBN = newBookData.ISBN;
+
+        for (auto& logEntry : log_) {
+            if (logEntry.ISBN == lastISBN) {
+                logEntry.ISBN = newISBN;
+            }
+        }
+        strncpy(book.ISBN, newISBN.c_str(), sizeof(book.ISBN) - 1);
         book.ISBN[sizeof(book.ISBN) - 1] = '\0';
-        log_.back().ISBN = newBookData.ISBN;
     }
+
     if (newBookData.title[0] != '\0') {
         strncpy(book.title, newBookData.title, sizeof(book.title) - 1);
         book.title[sizeof(book.title) - 1] = '\0';
@@ -570,7 +587,8 @@ void UserManager::ModifyLastBookInLogbook(const Book& newBookData) {
     if (newBookData.stock != '\0') {
         book.stock = newBookData.stock;
     }
+
     bookMgr.Delete(lastISBN);
     bookMgr.Insert(book);
-    diaryMgr.adddiary(log_.back().userID, "modifyed book: " + lastISBN + "to" +std::string(book.title));
+    diaryMgr.adddiary(log_.back().userID, "modified book: " + lastISBN + " to " + std::string(book.title));
 }
