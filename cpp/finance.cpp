@@ -53,7 +53,8 @@ void FinanceManager::printTransactions(int count) const {
         std::cout << "\n";
         return;
     }
-    if (count > priceChanges.size()) {
+    int s=priceChanges.size();
+    if (count > s)) {
         std::cout<<"Invalid\n";
         return;
 
