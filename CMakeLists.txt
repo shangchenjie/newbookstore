@@ -1,11 +1,17 @@
-add_executable(new_target bookstore-/cpp/diary.cpp
-        bookstore-/cpp/user.cpp
-        bookstore-/cpp/main.cpp
-        bookstore-/cpp/book.cpp
-        bookstore-/src/user.h
-        bookstore-/src/diary.h
-        bookstore-/src/book.h
-        bookstore-/cpp/finance.cpp
-        bookstore-/src/token.h
-        bookstore-/cpp/token.cpp
+cmake_minimum_required(VERSION 3.0)
+
+project(bookstore)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+include_directories(src)
+
+add_executable(bookstore
+        cpp/book.cpp
+        cpp/diary.cpp
+        cpp/finance.cpp
+        cpp/main.cpp
+        cpp/token.cpp
+        cpp/user.cpp
 )
