@@ -38,7 +38,7 @@ struct data {
 
 const int accountsizeofP = sizeof(User);
 const int accountsizeofH = sizeof(accountHeadNode);
-extern User* userbloc ;
+extern User userbloc[] ;
 extern accountHeadNode userlink[];
 inline bool comp(const char* userIDx, const char* userIDy) {
     return strcmp(userIDx, userIDy) <= 0;
