@@ -487,11 +487,11 @@ void BookManager::show(const std::string& field, const std::string& value) {
 
             // 输出符合条件的书籍
             if (book.title[0] != '\0') {
-                std::cout << book.ISBN << "  "
-                          << book.title << "  "
-                          << book.author << "  "
-                          << book.keywords << "  "
-                          << std::fixed << std::setprecision(2) << book.price << "  "
+                std::cout << book.ISBN << "   "
+                          << book.title << "   "
+                          << book.author << "   "
+                          << book.keywords <<"   "
+                          << std::fixed << std::setprecision(2) << book.price << "   "
                           << book.stock << "\n";
                 found = true;
             }
@@ -508,12 +508,12 @@ void BookManager::showall() {
         ISBNBody.ISBNvisitNode(ISBNlink[p].id);
         for (int i = 0; i < ISBNlink[p].size; ++i) {
             Book& book = ISBNbloc[i];
-            std::cout  << book.ISBN << "  "
-                                      << book.title << "  "
-                                      << book.author << "  "
-                                       << book.keywords << "  "
-                                       << book.price << "  "
-                                      << book.stock << "\n";
+            std::cout << book.ISBN << "   "
+                          << book.title << "   "
+                          << book.author << "   "
+                          << book.keywords <<"   "
+                          << std::fixed << std::setprecision(2) << book.price << "   "
+                          << book.stock << "\n";
         }
         p = ISBNlink[p].nex_head;
     }
